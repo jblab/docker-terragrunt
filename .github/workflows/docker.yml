@@ -1,0 +1,67 @@
+name: Update Docker Image
+
+on:
+  schedule:
+    - cron:  '0 6 * * *'
+  push:
+    branches:
+      - main
+  workflow_call:
+    secrets:
+      DOCKER_TOKEN:
+        required: true
+      DOCKER_USERNAME:
+        required: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Check for Terraform updates
+        id: tf_version
+        run: |
+          CURRENT_VERSION=$(grep -oP '(?<=TERRAFORM_VERSION=).*' Dockerfile)
+          LATEST_VERSION=$(curl --silent "https://checkpoint-api.hashicorp.com/v1/check/terraform?current_version=0.0.0" | grep -Po '(?<=current_version":")[^"]*')
+          if [ $CURRENT_VERSION != $LATEST_VERSION ]; then
+            echo "NEW_TF_VERSION=$LATEST_VERSION" >> $GITHUB_OUTPUT
+            echo >&2 "New Terraform version found: $LATEST_VERSION"
+          fi
+
+      - name: Check for Terragrunt updates
+        id: tg_version
+        run: |
+          set -x
+          CURRENT_VERSION=$(grep -oP '(?<=TERRAGRUNT_VERSION=).*' Dockerfile)
+          #LATEST_VERSION=$(curl --silent "https://api.github.com/repos/gruntwork-io/terragrunt/releases/latest" | grep -Po '(?<=tag_name": "v")[^"]*')
+          LATEST_VERSION=$(curl --silent "https://api.github.com/repos/gruntwork-io/terragrunt/releases/latest" | jq -r ".tag_name" | cut -c 2-)
+          if [ $CURRENT_VERSION != $LATEST_VERSION ]; then
+            echo "NEW_TG_VERSION=$LATEST_VERSION" >> $GITHUB_OUTPUT
+            echo >&2 "New Terragrunt version found: $LATEST_VERSION"
+          fi  
+
+      - name: Print versions
+        run: |
+          echo "TG version: ${{ steps.tg_version.outputs.NEW_TG_VERSION }}"
+          echo "TF version: ${{ steps.tf_version.outputs.NEW_TF_VERSION }}"
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_TOKEN }}
+
+      - name: Build and Push Docker Image
+        if: steps.tf_version.outputs.NEW_TF_VERSION || steps.tg_version.outputs.NEW_TG_VERSION
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: ${{ vars.DOCKER_REPOSITORY_NAME }}:${{ steps.tg_version.outputs.NEW_TG_VERSION || env.TG_VERSION }}-terraform-${{ steps.tf_version.outputs.NEW_TF_VERSION || env.TF_VERSION }}-ubuntu-jammy-build-${{ github.run_id}}.${{ github.run_number }}
+          build-args: |
+            TERRAFORM_VERSION=${{ steps.tf_version.outputs.NEW_TF_VERSION || env.TF_VERSION }}
+            TERRAGRUNT_VERSION=${{ steps.tg_version.outputs.NEW_TG_VERSION || env.TG_VERSION }}

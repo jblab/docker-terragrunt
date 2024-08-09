@@ -1,0 +1,8 @@
+services:
+  tg:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: dev
+    volumes:
+      - ./files/.bashrc.sh:/home/terragrunt/.bashrc:ro
