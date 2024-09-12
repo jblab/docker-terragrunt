@@ -36,18 +36,18 @@ jobs:
             echo "NEW_TF_VERSION=$LATEST_VERSION" >> $GITHUB_ENV
             echo >&2 "New Terraform version found: $LATEST_VERSION"
           fi
+          echo "TF_VERSION=$CURRENT_VERSION" >> $GITHUB_ENV
 
       - name: Check for Terragrunt updates
         id: tg_version
         run: |
-          set -x
           CURRENT_VERSION=$(grep -oP '(?<=TERRAGRUNT_VERSION=).*' Dockerfile)
-          #LATEST_VERSION=$(curl --silent "https://api.github.com/repos/gruntwork-io/terragrunt/releases/latest" | grep -Po '(?<=tag_name": "v")[^"]*')
           LATEST_VERSION=$(curl --silent "https://api.github.com/repos/gruntwork-io/terragrunt/releases/latest" | jq -r ".tag_name" | cut -c 2-)
           if [ "$CURRENT_VERSION" != "$LATEST_VERSION" ]; then
             echo "NEW_TG_VERSION=$LATEST_VERSION" >> $GITHUB_ENV
             echo >&2 "New Terragrunt version found: $LATEST_VERSION"
           fi
+          echo "TG_VERSION=$CURRENT_VERSION" >> $GITHUB_ENV
 
       - name: Print versions
         run: |
@@ -67,6 +67,14 @@ jobs:
           echo "tf_version=${{ env.NEW_TF_VERSION || env.TF_VERSION }}" >> $GITHUB_OUTPUT
           echo "new_tag=${{ env.NEW_TAG }}" >> $GITHUB_OUTPUT
 
+      - name: Publish Summary
+        run: |
+          echo "## Version summary" >> $GITHUB_STEP_SUMMARY
+          echo "| | Old | New |" >> $GITHUB_STEP_SUMMARY
+          echo "| --- | :-: | :-: |" >> $GITHUB_STEP_SUMMARY
+          echo "| Terraform | ${{ env.TF_VERSION }} | ${{ env.NEW_TF_VERSION }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Terragrunt | ${{ env.TG_VERSION }} | ${{ env.NEW_TG_VERSION }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Docker Tag | ${{ env.TG_VERSION }}-terraform-${{ env.TF_VERSION }} | ${{ env.NEW_TAG }} |" >> $GITHUB_STEP_SUMMARY
 
   build:
     name: Build and Push Docker Image
