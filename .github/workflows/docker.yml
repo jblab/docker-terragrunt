@@ -96,7 +96,9 @@ jobs:
         with:
           context: .
           push: true
-          tags: ${{ vars.DOCKER_REPOSITORY_NAME }}:${{ needs.versions.outputs.new_tag }}-ubuntu-jammy-build-${{ github.run_id }}.${{ github.run_number }}
+          tags: |
+            ${{ vars.DOCKER_REPOSITORY_NAME }}:${{ needs.versions.outputs.new_tag }}-ubuntu-jammy-build-${{ github.run_id }}.${{ github.run_number }}
+            ${{ vars.DOCKER_REPOSITORY_NAME }}:latest
           build-args: |
             TERRAFORM_VERSION=${{ needs.versions.outputs.tf_version }}
             TERRAGRUNT_VERSION=${{ needs.versions.outputs.tg_version }}
