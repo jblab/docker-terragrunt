@@ -18,9 +18,9 @@ jobs:
     name: Check Versions
     runs-on: ubuntu-latest
     outputs:
-      new_tag: ${{ steps.variables.outputs.new_tag }}
-      tf_version: ${{ steps.variables.outputs.tf_version }}
-      tg_version: ${{ steps.variables.outputs.tg_version }}
+      new-tag: ${{ steps.variables.outputs.new-tag }}
+      tf-version: ${{ steps.variables.outputs.tf-version }}
+      tg-version: ${{ steps.variables.outputs.tg-version }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -28,7 +28,7 @@ jobs:
           fetch-depth: 1
 
       - name: Check for Terraform updates
-        id: tf_version
+        id: tf-version
         run: |
           CURRENT_VERSION=$(grep -oP '(?<=TERRAFORM_VERSION=).*' Dockerfile)
           LATEST_VERSION=$(curl --silent "https://checkpoint-api.hashicorp.com/v1/check/terraform?current_version=0.0.0" | grep -Po '(?<=current_version":")[^"]*')
@@ -39,7 +39,7 @@ jobs:
           echo "TF_VERSION=$CURRENT_VERSION" >> $GITHUB_ENV
 
       - name: Check for Terragrunt updates
-        id: tg_version
+        id: tg-version
         run: |
           CURRENT_VERSION=$(grep -oP '(?<=TERRAGRUNT_VERSION=).*' Dockerfile)
           LATEST_VERSION=$(curl --silent "https://api.github.com/repos/gruntwork-io/terragrunt/releases/latest" | jq -r ".tag_name" | cut -c 2-)
@@ -50,17 +50,16 @@ jobs:
           echo "TG_VERSION=$CURRENT_VERSION" >> $GITHUB_ENV
 
       - name: Setting the NEW_TAG variable
-        id: new_tag
-        if: env.NEW_TF_VERSION || env.NEW_TG_VERSION
+        id: new-tag
         run: |
-          echo "NEW_TAG=${{ env.NEW_TG_VERSION || env.TG_VERSION }}-terraform-${{ env.NEW_TF_VERSION || env.TF_VERSION }}" >> $GITHUB_ENV
+          echo "NEW_TAG=tg-${{ env.NEW_TG_VERSION || env.TG_VERSION }}-tf-${{ env.NEW_TF_VERSION || env.TF_VERSION }}" >> $GITHUB_ENV
 
       - name: Export outputs
         id: variables
         run: |
-          echo "tg_version=${{ env.NEW_TG_VERSION || env.TG_VERSION }}" >> $GITHUB_OUTPUT
-          echo "tf_version=${{ env.NEW_TF_VERSION || env.TF_VERSION }}" >> $GITHUB_OUTPUT
-          echo "new_tag=${{ env.NEW_TAG }}" >> $GITHUB_OUTPUT
+          echo "tg-version=${{ env.NEW_TG_VERSION || env.TG_VERSION }}" >> $GITHUB_OUTPUT
+          echo "tf-version=${{ env.NEW_TF_VERSION || env.TF_VERSION }}" >> $GITHUB_OUTPUT
+          echo "new-tag=${{ env.NEW_TAG }}" >> $GITHUB_OUTPUT
 
       - name: Publish Summary
         run: |
@@ -69,13 +68,124 @@ jobs:
           echo "| --- | :-: | :-: |" >> $GITHUB_STEP_SUMMARY
           echo "| Terraform | ${{ env.TF_VERSION }} | ${{ env.NEW_TF_VERSION }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Terragrunt | ${{ env.TG_VERSION }} | ${{ env.NEW_TG_VERSION }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Docker Tag | ${{ env.TG_VERSION }}-terraform-${{ env.TF_VERSION }} | ${{ env.NEW_TAG }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Docker Tag | tg-${{ env.TG_VERSION }}-tf-${{ env.TF_VERSION }} | ${{ env.NEW_TAG }} |" >> $GITHUB_STEP_SUMMARY
+
+  ci:
+    name: Build Docker Image for CI
+    runs-on: ubuntu-latest
+    needs: versions
+    if: needs.versions.outputs.new-tag && needs.versions.outputs.tf-version && needs.versions.outputs.tg-version
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build and Push Docker Image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: false
+          tags: |
+            ${{ vars.DOCKER_REPOSITORY_NAME }}:0.0.0-${{ needs.versions.outputs.new-tag }}-ubuntu-jammy-build-${{ github.run_id }}.${{ github.run_number }}
+            ${{ vars.DOCKER_REPOSITORY_NAME }}:latest
+          build-args: |
+            TERRAFORM_VERSION=${{ needs.versions.outputs.tf-version }}
+            TERRAGRUNT_VERSION=${{ needs.versions.outputs.tg-version }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  git:
+    name: Update Git
+    runs-on: ubuntu-latest
+    needs: [ versions, ci ]
+    if: needs.versions.outputs.new-tag && needs.versions.outputs.tf-version && needs.versions.outputs.tg-version
+    environment: main
+    steps:
+      - uses: actions/create-github-app-token@v1.11.0
+        id: app-token
+        with:
+          app-id: ${{ vars.GHA_BOT_APP_ID }}
+          private-key: ${{ secrets.GHA_BOT_PRIVATE_KEY }}
+          owner: jbonnier
+          repositories: |
+            docker-terragrunt
+
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+          token: ${{ steps.app-token.outputs.token }}
+
+      - name: Set up Git
+        run: |
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+
+      - name: Update Dockerfile with new versions
+        run: |
+          sed -i "s/^ARG TERRAFORM_VERSION=.*/ARG TERRAFORM_VERSION=${{ needs.versions.outputs.tf-version }}/" Dockerfile
+          sed -i "s/^ARG TERRAGRUNT_VERSION=.*/ARG TERRAGRUNT_VERSION=${{ needs.versions.outputs.tg-version }}/" Dockerfile
+
+      - name: Get Latest Tag and Release
+        run: |
+          LATEST_RELEASE=$(gh release list --repo jblab/docker-terragrunt --limit 1 --exclude-drafts --json name -q .[0].name || echo 'N/A')
+          LATEST_TAG=$(gh api -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version: 2022-11-28" /repos/${{ github.repository }}/tags -q .[0].name || echo 'N/A')
+          echo "LATEST_RELEASE=$LATEST_RELEASE" >> $GITHUB_ENV
+          echo "LATEST_TAG=$LATEST_TAG" >> $GITHUB_ENV
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Commit updated Dockerfile
+        run: |
+          git checkout main
+          git add Dockerfile
+          if ! git diff-index --quiet HEAD --; then
+            git commit -m "chore(tool-versions): Update Dockerfile with new Terraform and Terragrunt versions [skip ci]"
+            git push origin main
+          fi
+
+      - name: Release
+        id: release
+        uses: huggingface/semver-release-action@latest
+        with:
+          commitAnalyzerPluginOpts: |
+            {
+              "preset": "angular",
+              "releaseRules": [
+                { "type": "docs", "scope": "README", "release": "patch" },
+                { "type": "chore", "scope": "tool-versions", "release": "patch" },
+                { "type": "refactor", "scope": "core-*", "release": "minor" },
+                { "type": "refactor", "release": "patch" },
+                { "scope": "no-release", "release": false }
+              ]
+            }
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Export outputs
+        id: variables
+        run: |
+          echo "new-tag=${{ steps.release.outputs.version }}" >> $GITHUB_OUTPUT
+
+      - name: Publish Summary
+        run: |
+          echo "## New Tag summary" >> $GITHUB_STEP_SUMMARY
+          echo "A new Release and Tag has been created."
+          echo "| | Prvious | New |" >> $GITHUB_STEP_SUMMARY
+          echo "| --- | :-: | :-: |" >> $GITHUB_STEP_SUMMARY
+          echo "| Tag | ${{ env.LATEST_TAG }} | ${{ steps.release.outputs.full }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Release | ${{ env.LATEST_RELEASE }} | ${{ steps.release.outputs.full }} |" >> $GITHUB_STEP_SUMMARY
 
   build:
     name: Build and Push Docker Image
     runs-on: ubuntu-latest
-    needs: versions
-    if: needs.versions.outputs.new_tag && needs.versions.outputs.tf_version && needs.versions.outputs.tg_version
+    needs: [ versions, ci, git ]
+    if: needs.versions.outputs.new-tag && needs.versions.outputs.tf-version && needs.versions.outputs.tg-version && needs.git.outputs.new-tag
+    environment: main
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -97,76 +207,10 @@ jobs:
           context: .
           push: true
           tags: |
-            ${{ vars.DOCKER_REPOSITORY_NAME }}:${{ needs.versions.outputs.new_tag }}-ubuntu-jammy-build-${{ github.run_id }}.${{ github.run_number }}
+            ${{ vars.DOCKER_REPOSITORY_NAME }}:${{ needs.git.outputs.new-tag }}-${{ needs.versions.outputs.new-tag }}-ubuntu-jammy-build-${{ github.run_id }}.${{ github.run_number }}
             ${{ vars.DOCKER_REPOSITORY_NAME }}:latest
           build-args: |
-            TERRAFORM_VERSION=${{ needs.versions.outputs.tf_version }}
-            TERRAGRUNT_VERSION=${{ needs.versions.outputs.tg_version }}
+            TERRAFORM_VERSION=${{ needs.versions.outputs.tf-version }}
+            TERRAGRUNT_VERSION=${{ needs.versions.outputs.tg-version }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
-
-  git:
-    name: Update Git
-    runs-on: ubuntu-latest
-    needs: [ versions, build ]
-    if: needs.versions.outputs.new_tag && needs.versions.outputs.tf_version && needs.versions.outputs.tg_version
-    permissions:
-      contents: write
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 1
-
-      - name: Set up Git
-        run: |
-          git config --global user.name 'github-actions[bot]'
-          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
-
-      - name: Update Dockerfile with new versions
-        run: |
-          sed -i "s/^ARG TERRAFORM_VERSION=.*/ARG TERRAFORM_VERSION=${{ needs.versions.outputs.tf_version }}/" Dockerfile
-          sed -i "s/^ARG TERRAGRUNT_VERSION=.*/ARG TERRAGRUNT_VERSION=${{ needs.versions.outputs.tg_version }}/" Dockerfile
-
-      - name: Get Latest Tag and Release
-        run: |
-          LATEST_RELEASE=$(gh release list --repo jblab/docker-terragrunt --limit 1 --exclude-drafts --json name -q .[0].name || echo 'N/A')
-          LATEST_TAG=$(gh api -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version: 2022-11-28" /repos/${{ github.repository }}/tags -q .[0].name || echo 'N/A')
-          echo "LATEST_RELEASE=$LATEST_RELEASE" >> $GITHUB_ENV
-          echo "LATEST_TAG=$LATEST_TAG" >> $GITHUB_ENV
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Commit updated Dockerfile
-        run: |
-          git checkout main
-          git add Dockerfile
-          git commit -m "chore(tool-versions): Update Dockerfile with new Terraform and Terragrunt versions"
-          git push origin main
-
-      - name: Release
-        id: release
-        uses: huggingface/semver-release-action@latest
-        with:
-          commitAnalyzerPluginOpts: |
-            {
-              "preset": "angular",
-              "releaseRules": [
-                { "type": "docs", "scope": "README", "release": "patch" },
-                { "type": "chore", "scope": "tool-versions", "release": "patch" },
-                { "type": "refactor", "scope": "core-*", "release": "minor" },
-                { "type": "refactor", "release": "patch" },
-                { "scope": "no-release", "release": false }
-              ]
-            }
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Publish Summary
-        run: |
-          echo "## New Tag summary" >> $GITHUB_STEP_SUMMARY
-          echo "A new Release and Tag has been created."
-          echo "| | Prvious | New |" >> $GITHUB_STEP_SUMMARY
-          echo "| --- | :-: | :-: |" >> $GITHUB_STEP_SUMMARY
-          echo "| Tag | ${{ env.LATEST_TAG }} | ${{ steps.release.outputs.full }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Release | ${{ env.LATEST_RELEASE }} | ${{ steps.release.outputs.full }} |" >> $GITHUB_STEP_SUMMARY
