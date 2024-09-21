@@ -106,7 +106,6 @@ jobs:
         with:
           app-id: ${{ vars.GHA_BOT_APP_ID }}
           private-key: ${{ secrets.GHA_BOT_PRIVATE_KEY }}
-          owner: jbonnier
           repositories: |
             docker-terragrunt
 
