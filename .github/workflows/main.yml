@@ -84,8 +84,11 @@ jobs:
           context: .
           push: false
           tags: |
-            ${{ vars.DOCKER_REPOSITORY_NAME }}:0.0.0-${{ needs.versions.outputs.new-tag }}-ubuntu-jammy-build-${{ github.run_id }}.${{ github.run_number }}
+            ${{ vars.DOCKER_REPOSITORY_NAME }}:0.0.0-${{ needs.versions.outputs.new-tag }}
             ${{ vars.DOCKER_REPOSITORY_NAME }}:latest
+          labels: |
+            io.jblab.build.number=${{ github.run_id }}.${{ github.run_number }}
+            io.jblab.git.repository=${{ github.repositoryUrl }}
           build-args: |
             TERRAFORM_VERSION=${{ needs.versions.outputs.tf-version }}
             TERRAGRUNT_VERSION=${{ needs.versions.outputs.tg-version }}
@@ -202,8 +205,11 @@ jobs:
           context: .
           push: true
           tags: |
-            ${{ vars.DOCKER_REPOSITORY_NAME }}:${{ needs.git.outputs.new-tag }}-${{ needs.versions.outputs.new-tag }}-ubuntu-jammy-build-${{ github.run_id }}.${{ github.run_number }}
+            ${{ vars.DOCKER_REPOSITORY_NAME }}:0.0.0-${{ needs.versions.outputs.new-tag }}
             ${{ vars.DOCKER_REPOSITORY_NAME }}:latest
+          labels: |
+            io.jblab.build.number=${{ github.run_id }}.${{ github.run_number }}
+            io.jblab.git.repository=${{ github.repositoryUrl }}
           build-args: |
             TERRAFORM_VERSION=${{ needs.versions.outputs.tf-version }}
             TERRAGRUNT_VERSION=${{ needs.versions.outputs.tg-version }}
