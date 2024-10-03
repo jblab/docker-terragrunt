@@ -118,6 +118,14 @@ jobs:
           fetch-depth: 1
           token: ${{ steps.app-token.outputs.token }}
 
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: npm install
+
       - name: Set up Git
         run: |
           git config --global user.name 'github-actions[bot]'
@@ -146,28 +154,21 @@ jobs:
             git push origin main
           fi
 
-      - name: Release
-        id: release
-        uses: huggingface/semver-release-action@latest
-        with:
-          commitAnalyzerPluginOpts: |
-            {
-              "preset": "angular",
-              "releaseRules": [
-                { "type": "docs", "scope": "README", "release": "patch" },
-                { "type": "chore", "scope": "tool-versions", "release": "patch" },
-                { "type": "refactor", "scope": "core-*", "release": "minor" },
-                { "type": "refactor", "release": "patch" },
-                { "scope": "no-release", "release": false }
-              ]
-            }
+      - name: Run semantic-release
+        id: semantic
+        run: |
+          npx semantic-release 2>&1 | tee release_output.txt
+          TAG=$(grep -oP "v\d+\.\d+\.\d+" release_output.txt | head -1)
+          if [[ -n "$TAG" ]]; then
+            echo "NEW_TAG=$TAG" >> $GITHUB_ENV
+          fi
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Export outputs
         id: variables
         run: |
-          echo "new-tag=${{ steps.release.outputs.version }}" >> $GITHUB_OUTPUT
+          echo "new-tag=${{ env.NEW_TAG }}" >> $GITHUB_OUTPUT
 
       - name: Publish Summary
         run: |
@@ -175,14 +176,14 @@ jobs:
           echo "A new Release and Tag has been created."
           echo "| | Prvious | New |" >> $GITHUB_STEP_SUMMARY
           echo "| --- | :-: | :-: |" >> $GITHUB_STEP_SUMMARY
-          echo "| Tag | ${{ env.LATEST_TAG }} | ${{ steps.release.outputs.version }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Release | ${{ env.LATEST_RELEASE }} | ${{ steps.release.outputs.version }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Tag | ${{ env.LATEST_TAG }} | ${{ env.NEW_TAG }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Release | ${{ env.LATEST_RELEASE }} | ${{ env.NEW_TAG }} |" >> $GITHUB_STEP_SUMMARY
 
   build:
     name: Build and Push Docker Image
     runs-on: ubuntu-latest
     needs: [ versions, ci, git ]
-    if: needs.versions.outputs.new-tag && needs.versions.outputs.tf-version && needs.versions.outputs.tg-version && needs.git.outputs.new-tag
+    if: needs.versions.outputs.new-tag && needs.versions.outputs.tf-version && needs.versions.outputs.tg-version && needs.git.outputs.new-taga
     environment: main
     steps:
       - name: Checkout
