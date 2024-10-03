@@ -1,0 +1,36 @@
+{
+  "name": "docker-terragrunt",
+  "version": "1.0.0",
+  "description": "[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg?style=flat-square)](LICENSE) [![Latest Release](https://img.shields.io/github/release/jblab/docker-terragrunt.svg?style=flat-square)](https://github.com/jblab/docker-terragrunt/releases/latest) ![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/jblab/docker-terragrunt/main.yml?style=flat-square)",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jblab/docker-terragrunt.git"
+  },
+  "keywords": [
+    "docker",
+    "terragrunt",
+    "terraform",
+    "cli",
+    "tool"
+  ],
+  "author": "Julien Bonnier",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/jblab/docker-terragrunt/issues"
+  },
+  "homepage": "https://github.com/jblab/docker-terragrunt#readme",
+  "devDependencies": {
+    "@semantic-release/changelog": "^6.0.3",
+    "@semantic-release/commit-analyzer": "^13.0.0",
+    "@semantic-release/exec": "^6.0.3",
+    "@semantic-release/git": "^10.0.1",
+    "@semantic-release/github": "^11.0.0",
+    "@semantic-release/npm": "^12.0.1",
+    "@semantic-release/release-notes-generator": "^14.0.1",
+    "semantic-release": "^24.1.2"
+  }
+}
