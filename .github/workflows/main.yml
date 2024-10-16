@@ -158,7 +158,7 @@ jobs:
         id: semantic
         run: |
           npx semantic-release 2>&1 | tee release_output.txt
-          TAG=$(tail -1 release_output.txt | grep -oP "\d+\.\d+\.\d+")
+          TAG=$(tail -1 release_output.txt | grep -oP "\d+\.\d+\.\d+" || true)
           if [[ -n "$TAG" ]]; then
             echo "NEW_TAG=$TAG" >> $GITHUB_ENV
           fi
