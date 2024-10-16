@@ -1,6 +1,6 @@
 {
   "name": "docker-terragrunt",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg?style=flat-square)](LICENSE) [![Latest Release](https://img.shields.io/github/release/jblab/docker-terragrunt.svg?style=flat-square)](https://github.com/jblab/docker-terragrunt/releases/latest) ![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/jblab/docker-terragrunt/main.yml?style=flat-square)",
   "main": "index.js",
   "scripts": {
