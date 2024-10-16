@@ -1,5 +1,4 @@
 branches: [ main ]
-repositoryUrl: "https://github.com/jbonnier/docker-terragrunt.git",
 tagFormat: ${version}
 plugins:
   - - '@semantic-release/commit-analyzer'
