@@ -149,7 +149,7 @@ jobs:
         run: |
           git checkout main
           git add Dockerfile
-          if ! git diff-index --quiet HEAD --; then
+          if ! git diff-index --quiet HEAD -- Dockerfile; then
             git commit -m "chore(tool-versions): Update Dockerfile with new Terraform and Terragrunt versions [skip ci]"
             git push origin main
           fi
