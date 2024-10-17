@@ -1,6 +1,6 @@
 # docker-terragrunt <img src="https://assets.jblab.info/2024/03/17/jblab-logo-with-text.26da23672fc44c17078dc8ce2ff8495ddb190163.webp" alt="jblab logo" width="120" align="right" style="max-width: 100%">
 
-[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg?style=flat-square)](LICENSE) [![Latest Release](https://img.shields.io/github/release/jblab/docker-terragrunt.svg?style=flat-square)](https://github.com/jblab/docker-terragrunt/releases/latest) ![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/jblab/docker-terragrunt/main.yml?style=flat-square)
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg?style=flat-square)](LICENSE) [![Latest Release](https://img.shields.io/github/release/jblab/docker-terragrunt.svg?style=flat-square)](https://github.com/jblab/docker-terragrunt/releases/latest) ![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/jblab/docker-terragrunt/main.yaml?style=flat-square)
 
 This Docker image includes Terraform and Terragrunt, which are essential tools for managing infrastructure as code. It
 can be used for local development to avoid managing different versions of these tools on your system or as part of your
