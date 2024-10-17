@@ -183,7 +183,7 @@ jobs:
     name: Build and Push Docker Image
     runs-on: ubuntu-latest
     needs: [ versions, ci, git ]
-    if: needs.versions.outputs.new-tag && needs.versions.outputs.tf-version && needs.versions.outputs.tg-version && needs.git.outputs.new-taga
+    if: needs.versions.outputs.new-tag && needs.versions.outputs.tf-version && needs.versions.outputs.tg-version && needs.git.outputs.new-tag
     environment: main
     steps:
       - name: Checkout
