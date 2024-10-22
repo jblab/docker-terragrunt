@@ -175,4 +175,20 @@ jobs:
       git_tag: ${{ needs.git.outputs.new-tag }}
       tf_version: ${{ needs.versions.outputs.tf-version }}
       tg_version: ${{ needs.versions.outputs.tg-version }}
+      target: 'base'
+    secrets: inherit
+
+  build_ado:
+    name: Build and Push Docker Image for Azure DevOps
+    needs: [ versions, ci, git ]
+    if: needs.versions.outputs.new-tag && needs.versions.outputs.tf-version && needs.versions.outputs.tg-version && needs.git.outputs.new-tag
+    uses: ./.github/workflows/docker-build.yaml
+    with:
+      push_image: true
+      environment: main
+      version_tag: ${{ needs.versions.outputs.new-tag }}-azdo
+      git_tag: ${{ needs.git.outputs.new-tag }}
+      tf_version: ${{ needs.versions.outputs.tf-version }}
+      tg_version: ${{ needs.versions.outputs.tg-version }}
+      target: 'ado_builder'
     secrets: inherit

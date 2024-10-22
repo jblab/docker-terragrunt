@@ -37,6 +37,8 @@ RUN set -e; \
     chmod +x /usr/local/bin/terragrunt; \
     terragrunt -version
 
+ENTRYPOINT []
+
 # ----------------------------------------------------------------------------------------------------------------------
 # DEV
 # ----------------------------------------------------------------------------------------------------------------------
@@ -64,7 +66,5 @@ RUN set -eu; \
     apt-get update; \
     apt-get install nodejs -y; \
     rm -rf /var/lib/apt/lists/*;
-
-ENTRYPOINT []
 
 LABEL "com.azure.dev.pipelines.agent.handler.node.path"="/usr/bin/node"

@@ -27,6 +27,10 @@ on:
         description: 'The environment for the secrets'
         type: string
         default: ''
+      target:
+        description: 'The Dockerfile stage to target'
+        type: string
+        default: ''
     secrets:
       DOCKER_USERNAME:
         required: true
@@ -58,6 +62,7 @@ jobs:
         with:
           context: .
           push: ${{ inputs.push_image }}
+          target: ${{ inputs.target }}
           tags: |
             ${{ vars.DOCKER_REPOSITORY_NAME }}:${{ inputs.git_tag }}-${{ inputs.version_tag }}
             ${{ vars.DOCKER_REPOSITORY_NAME }}:latest
