@@ -1,3 +1,5 @@
+## [1.1.15](https://github.com/jblab/docker-terragrunt/compare/1.1.14...1.1.15) (2024-12-03)
+
 ## [1.1.14](https://github.com/jblab/docker-terragrunt/compare/1.1.13...1.1.14) (2024-11-29)
 
 ## [1.1.13](https://github.com/jblab/docker-terragrunt/compare/1.1.12...1.1.13) (2024-11-28)
