@@ -21,7 +21,7 @@ RUN set -eu \
 
 RUN set -eu; \
     apt update; \
-    apt install -y --no-install-recommends bash git openssh-client vim tree make graphviz curl ca-certificates unzip; \
+    apt install -y --no-install-recommends git openssh-client curl ca-certificates unzip; \
     rm -rf /var/lib/apt/lists/*;
 
 RUN set -eu; \
@@ -44,6 +44,11 @@ ENTRYPOINT []
 # ----------------------------------------------------------------------------------------------------------------------
 FROM base AS dev
 
+RUN set -eu; \
+    apt update; \
+    apt install -y --no-install-recommends bash vim tree make graphviz; \
+    rm -rf /var/lib/apt/lists/*;
+
 USER terragrunt
 
 STOPSIGNAL SIGKILL
@@ -59,7 +64,7 @@ ARG NODE_MAJOR="20"
 
 RUN set -eu; \
     apt-get update; \
-    apt-get install -y ca-certificates gnupg; \
+    apt-get install -y ca-certificates gnupg bash; \
     mkdir -p /etc/apt/keyrings ; \
     curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key | gpg --dearmor -o /etc/apt/keyrings/nodesource.gpg; \
     echo "deb [signed-by=/etc/apt/keyrings/nodesource.gpg] https://deb.nodesource.com/node_$NODE_MAJOR.x nodistro main" | tee /etc/apt/sources.list.d/nodesource.list; \
