@@ -1,3 +1,15 @@
+# [2.0.0](https://github.com/jblab/docker-terragrunt/compare/1.1.28...2.0.0) (2025-01-15)
+
+
+### Features
+
+* Remove unnecessary tools from base image ([3565e72](https://github.com/jblab/docker-terragrunt/commit/3565e72f377bf20ce5e551f194306e86e7b8dab9))
+
+
+### BREAKING CHANGES
+
+* some tools are no longer included in the base image
+
 ## [1.1.28](https://github.com/jblab/docker-terragrunt/compare/1.1.27...1.1.28) (2025-01-11)
 
 ## [1.1.27](https://github.com/jblab/docker-terragrunt/compare/1.1.26...1.1.27) (2025-01-10)
