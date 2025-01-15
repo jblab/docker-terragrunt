@@ -5,4 +5,4 @@ services:
       dockerfile: Dockerfile
       target: dev
     volumes:
-      - ./files/.bashrc.sh:/home/terragrunt/.bashrc:ro
+      - ./files/bashrc.sh:/home/terragrunt/.bashrc:ro

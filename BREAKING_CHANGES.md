@@ -1,5 +1,5 @@
 # Breaking Changes
 
-## x.x.x
+## 2.0.0
 
-Breaking change description
+- Remove extra tools from default (base) image.
