@@ -52,7 +52,7 @@ RUN set -eu; \
 USER terragrunt
 
 STOPSIGNAL SIGKILL
-ENTRYPOINT ["sleep", "infinity"]
+CMD ["sleep", "infinity"]
 
 # ----------------------------------------------------------------------------------------------------------------------
 # ADO Builder target, this image should be pushed to a Docker registry and used by the Azure DevOps Build Agent.
