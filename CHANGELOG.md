@@ -1,3 +1,10 @@
+# [2.1.0](https://github.com/jblab/docker-terragrunt/compare/2.0.0...2.1.0) (2025-01-16)
+
+
+### Features
+
+* Change the entrypoint of the `dev` target for a command ([8eab849](https://github.com/jblab/docker-terragrunt/commit/8eab849d6d8d1dc6b8aa08303e8a186a60886d0d))
+
 # [2.0.0](https://github.com/jblab/docker-terragrunt/compare/1.1.28...2.0.0) (2025-01-15)
 
 
