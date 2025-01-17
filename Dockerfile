@@ -8,14 +8,13 @@ ARG TERRAGRUNT_VERSION=0.72.1
 ARG USER_ID=1000
 ARG GROUP_ID=1000
 
-RUN set -eu \
-    && addgroup --gid $GROUP_ID --system terragrunt \
-    && adduser \
-        --disabled-password \
-        --system \
-        --home /home/terragrunt \
+RUN set -eu; \
+    groupadd --gid $GROUP_ID --system terragrunt; \
+    useradd \
         --uid $USER_ID \
         --gid $GROUP_ID \
+        --home /home/terragrunt \
+        --system \
         --shell /sbin/nologin \
         terragrunt
 
@@ -46,7 +45,7 @@ FROM base AS dev
 
 RUN set -eu; \
     apt update; \
-    apt install -y --no-install-recommends bash vim tree make graphviz; \
+    apt install -y --no-install-recommends vim tree make graphviz; \
     rm -rf /var/lib/apt/lists/*;
 
 USER terragrunt
@@ -64,7 +63,7 @@ ARG NODE_MAJOR="20"
 
 RUN set -eu; \
     apt-get update; \
-    apt-get install -y ca-certificates gnupg bash; \
+    apt-get install -y ca-certificates gnupg; \
     mkdir -p /etc/apt/keyrings ; \
     curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key | gpg --dearmor -o /etc/apt/keyrings/nodesource.gpg; \
     echo "deb [signed-by=/etc/apt/keyrings/nodesource.gpg] https://deb.nodesource.com/node_$NODE_MAJOR.x nodistro main" | tee /etc/apt/sources.list.d/nodesource.list; \
