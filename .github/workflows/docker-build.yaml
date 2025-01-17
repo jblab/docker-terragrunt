@@ -7,8 +7,8 @@ on:
         description: 'Whether to push the image or not'
         required: true
         type: boolean
-      git_tag:
-        description: 'The Git Semver tag'
+      tags:
+        description: 'The Docker image tags to be used (one per line or comma-separated)'
         required: true
         type: string
       tf_version:
@@ -17,10 +17,6 @@ on:
         type: string
       tg_version:
         description: 'The Terragrunt version'
-        required: true
-        type: string
-      version_tag:
-        description: 'The Docker image tag'
         required: true
         type: string
       environment:
@@ -63,9 +59,7 @@ jobs:
           context: .
           push: ${{ inputs.push_image }}
           target: ${{ inputs.target }}
-          tags: |
-            ${{ vars.DOCKER_REPOSITORY_NAME }}:${{ inputs.git_tag }}-${{ inputs.version_tag }}
-            ${{ vars.DOCKER_REPOSITORY_NAME }}:latest
+          tags: ${{ inputs.tags }}
           labels: |
             io.jblab.build.number=${{ github.run_id }}.${{ github.run_number }}
             io.jblab.git.repository=${{ github.repositoryUrl }}

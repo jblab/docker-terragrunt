@@ -171,10 +171,11 @@ jobs:
     with:
       push_image: true
       environment: main
-      version_tag: ${{ needs.versions.outputs.new-tag }}
-      git_tag: ${{ needs.git.outputs.new-tag }}
       tf_version: ${{ needs.versions.outputs.tf-version }}
       tg_version: ${{ needs.versions.outputs.tg-version }}
+      tags: |
+        ${{ vars.DOCKER_REPOSITORY_NAME }}:${{ needs.git.outputs.new-tag }}-${{ needs.versions.outputs.new-tag }}
+        ${{ vars.DOCKER_REPOSITORY_NAME }}:latest
       target: 'base'
     secrets: inherit
 
@@ -186,11 +187,10 @@ jobs:
     with:
       push_image: true
       environment: main
-      version_tag: ${{ needs.versions.outputs.new-tag }}-dev-tools
-      git_tag: ${{ needs.git.outputs.new-tag }}
       tf_version: ${{ needs.versions.outputs.tf-version }}
       tg_version: ${{ needs.versions.outputs.tg-version }}
       target: 'dev'
+      tags: ${{ vars.DOCKER_REPOSITORY_NAME }}:${{ needs.git.outputs.new-tag }}-${{ needs.versions.outputs.new-tag }}-dev-tools
     secrets: inherit
 
   build_ado:
@@ -201,9 +201,8 @@ jobs:
     with:
       push_image: true
       environment: main
-      version_tag: ${{ needs.versions.outputs.new-tag }}-azdo
-      git_tag: ${{ needs.git.outputs.new-tag }}
       tf_version: ${{ needs.versions.outputs.tf-version }}
       tg_version: ${{ needs.versions.outputs.tg-version }}
       target: 'ado_builder'
+      tags: ${{ vars.DOCKER_REPOSITORY_NAME }}:${{ needs.git.outputs.new-tag }}-${{ needs.versions.outputs.new-tag }}-azdo
     secrets: inherit
