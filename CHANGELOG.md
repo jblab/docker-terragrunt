@@ -1,3 +1,10 @@
+## [2.1.1](https://github.com/jblab/docker-terragrunt/compare/2.1.0...2.1.1) (2025-01-17)
+
+
+### Bug Fixes
+
+* Update forgotten `ci` job ([9410174](https://github.com/jblab/docker-terragrunt/commit/941017450bc5af9b0bbb4978f53c38084e35fc3a))
+
 # [2.1.0](https://github.com/jblab/docker-terragrunt/compare/2.0.0...2.1.0) (2025-01-16)
 
 
