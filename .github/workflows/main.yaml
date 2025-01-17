@@ -71,10 +71,9 @@ jobs:
     uses: ./.github/workflows/docker-build.yaml
     with:
       push_image: false
-      git_tag: 0.0.0
       tf_version: ${{ needs.versions.outputs.tf-version }}
       tg_version: ${{ needs.versions.outputs.tg-version }}
-      version_tag: ${{ needs.versions.outputs.new-tag }}
+      tags: ${{ vars.DOCKER_REPOSITORY_NAME }}:0.0.0-${{ needs.versions.outputs.new-tag }}
     secrets:
       DOCKER_USERNAME: ''
       DOCKER_TOKEN: ''
