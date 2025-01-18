@@ -12,10 +12,24 @@ CI/CD pipelines. The lightweight, Ubuntu-based image ensures that you run your p
 
 > [!IMPORTANT]
 >
-> We do not pin modules to versions in our examples because of the difficulty of keeping the versions in
-> the documentation in sync with the latest released versions. We highly recommend that in your code you pin the version
-> to the exact version you are using so that your infrastructure remains stable, and update versions in a systematic way
-> so that they do not catch you by surprise.
+> We intentionally do not pin the container image to a specific version in our examples to avoid the challenge of
+> keeping the documentation aligned with the latest releases. However, we strongly recommend that you always specify the
+> exact version of the container image in your code. Doing so ensures your infrastructure remains stable and
+> predictable. Additionally, make sure to update versions systematically to avoid unexpected issues.
+
+> [!TIP]
+> 
+> Three variants of the image are available on Docker Hub:
+>
+> 1. The base image: Also tagged as `latest`, this image contains only the essential tools required for Terragrunt and
+>    Terraform.
+> 2. The `dev-tools` image: Includes additional tools such as `vim`, `tree`, `make`, and `graphviz`, which are useful 
+>    during local development and when building Infrastructure-as-Code (IaC) projects.
+> 3. The `azdo` image: Includes Node.js, a requirement for running Azure DevOps Pipeline container jobs. For more 
+>    details, refer to [the official Azure documentation](https://learn.microsoft.com/en-us/azure/devops/pipelines/process/container-phases?view=azure-devops&tabs=linux#additional-container-requirements).
+> 
+> Choose the variant that best suits your specific task.
+
 
 Pull the Docker image from the Docker Hub:
 
