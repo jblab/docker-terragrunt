@@ -3,8 +3,8 @@
 # ----------------------------------------------------------------------------------------------------------------------
 FROM ubuntu:jammy AS base
 
-ARG TERRAFORM_VERSION=1.10.5
-ARG TERRAGRUNT_VERSION=0.73.14
+ARG TERRAFORM_VERSION=1.11.0
+ARG TERRAGRUNT_VERSION=0.73.16
 ARG USER_ID=1000
 ARG GROUP_ID=1000
 
