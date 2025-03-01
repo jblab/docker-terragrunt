@@ -1,3 +1,10 @@
+## [2.1.19](https://github.com/jblab/docker-terragrunt/compare/2.1.18...2.1.19) (2025-03-01)
+
+
+### Bug Fixes
+
+* Remove "v" prefix from Terraform version number ([d4b2283](https://github.com/jblab/docker-terragrunt/commit/d4b2283b5ab4ff4f16999ef597cdfac6f1cc2ad3))
+
 ## [2.1.18](https://github.com/jblab/docker-terragrunt/compare/2.1.17...2.1.18) (2025-02-26)
 
 ## [2.1.17](https://github.com/jblab/docker-terragrunt/compare/2.1.16...2.1.17) (2025-02-25)
