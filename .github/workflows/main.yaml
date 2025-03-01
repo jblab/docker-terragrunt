@@ -26,6 +26,10 @@ jobs:
         run: |
           CURRENT_VERSION=$(grep -oP '(?<=TERRAFORM_VERSION=).*' Dockerfile)
           LATEST_VERSION=$(curl --silent "https://checkpoint-api.hashicorp.com/v1/check/terraform?current_version=0.0.0" | grep -Po '(?<=current_version":")[^"]*')
+          if [[ $LATEST_VERSION == v* ]]; then
+            # Remove the v from the version number
+            LATEST_VERSION=${LATEST_VERSION:1}
+          fi
           if [ "$CURRENT_VERSION" != "$LATEST_VERSION" ]; then
             echo "NEW_TF_VERSION=$LATEST_VERSION" >> $GITHUB_ENV
             echo >&2 "New Terraform version found: $LATEST_VERSION"
