@@ -1,3 +1,10 @@
+# [2.2.0](https://github.com/jblab/docker-terragrunt/compare/2.1.31...2.2.0) (2025-03-21)
+
+
+### Features
+
+* update version semantic based on tools version as well ([9dbfe00](https://github.com/jblab/docker-terragrunt/commit/9dbfe00df97eb8b55525ab6ce22f97995031a4f1))
+
 ## [2.1.31](https://github.com/jblab/docker-terragrunt/compare/2.1.30...2.1.31) (2025-03-21)
 
 ## [2.1.30](https://github.com/jblab/docker-terragrunt/compare/2.1.29...2.1.30) (2025-03-20)
