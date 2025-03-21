@@ -8,6 +8,15 @@ plugins:
           scope: README
           release: patch
         - type: chore
+          scope: tool-versions-major
+          release: major
+        - type: chore
+          scope: tool-versions-minor
+          release: minor
+        - type: chore
+          scope: tool-versions-patch
+          release: patch
+        - type: chore
           scope: tool-versions
           release: patch
         - type: refactor
