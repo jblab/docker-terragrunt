@@ -15,6 +15,7 @@ jobs:
       new-tag: ${{ steps.variables.outputs.new-tag }}
       tf-version: ${{ steps.variables.outputs.tf-version }}
       tg-version: ${{ steps.variables.outputs.tg-version }}
+      update-type: ${{ steps.variables.outputs.update-type }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -47,6 +48,38 @@ jobs:
           fi
           echo "TG_VERSION=$CURRENT_VERSION" >> $GITHUB_ENV
 
+      - name: Compare version and extract update type
+        id: compare-version
+        run: |
+          compare_versions() {
+            IFS='.' read -r old_major old_minor old_patch <<< "$1"
+            IFS='.' read -r new_major new_minor new_patch <<< "$2"
+
+            if (( new_major > old_major )); then echo "major"
+            elif (( new_minor > old_minor )); then echo "minor"
+            elif (( new_patch > old_patch )); then echo "patch"
+            else echo ""
+            fi
+          }
+
+          TF_TYPE=$(compare_versions "${TF_VERSION}" "${NEW_TF_VERSION:-$TF_VERSION}")
+          TG_TYPE=$(compare_versions "${TG_VERSION}" "${NEW_TG_VERSION:-$TG_VERSION}")
+
+          if [[ "$TF_TYPE" == "major" || "$TG_TYPE" == "major" ]]; then UPDATE_TYPE="major"
+          elif [[ "$TF_TYPE" == "minor" || "$TG_TYPE" == "minor" ]]; then UPDATE_TYPE="minor"
+          elif [[ "$TF_TYPE" == "patch" || "$TG_TYPE" == "patch" ]]; then UPDATE_TYPE="patch"
+          else UPDATE_TYPE="none"
+          fi
+
+          echo "TF_UPDATE_TYPE=$TF_TYPE" >> $GITHUB_ENV
+          echo "TG_UPDATE_TYPE=$TG_TYPE" >> $GITHUB_ENV
+          echo "UPDATE_TYPE=$UPDATE_TYPE" >> $GITHUB_ENV
+        env:
+          TF_VERSION: ${{ env.TF_VERSION }}
+          NEW_TF_VERSION: ${{ env.NEW_TF_VERSION }}
+          TG_VERSION: ${{ env.TG_VERSION }}
+          NEW_TG_VERSION: ${{ env.NEW_TG_VERSION }}
+
       - name: Setting the NEW_TAG variable
         id: new-tag
         run: |
@@ -58,15 +91,21 @@ jobs:
           echo "tg-version=${{ env.NEW_TG_VERSION || env.TG_VERSION }}" >> $GITHUB_OUTPUT
           echo "tf-version=${{ env.NEW_TF_VERSION || env.TF_VERSION }}" >> $GITHUB_OUTPUT
           echo "new-tag=${{ env.NEW_TAG }}" >> $GITHUB_OUTPUT
+          echo "update-type=${{ env.UPDATE_TYPE }}" >> $GITHUB_OUTPUT
 
       - name: Publish Summary
         run: |
           echo "## Version summary" >> $GITHUB_STEP_SUMMARY
-          echo "| | Old | New |" >> $GITHUB_STEP_SUMMARY
-          echo "| --- | :-: | :-: |" >> $GITHUB_STEP_SUMMARY
-          echo "| Terraform | ${{ env.TF_VERSION }} | ${{ env.NEW_TF_VERSION }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Terragrunt | ${{ env.TG_VERSION }} | ${{ env.NEW_TG_VERSION }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Docker Tag | tg-${{ env.TG_VERSION }}-tf-${{ env.TF_VERSION }} | ${{ env.NEW_TAG }} |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          if [[ "${{ env.UPDATE_TYPE }}" != "none" ]]; then
+            echo "A new **${{ env.UPDATE_TYPE }}** version has been found!" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+          fi
+          echo "| | Old | New | Type |" >> $GITHUB_STEP_SUMMARY
+          echo "| --- | :-: | :-: | :-: |" >> $GITHUB_STEP_SUMMARY
+          echo "| Terraform | ${{ env.TF_VERSION }} | ${{ env.NEW_TF_VERSION }} | ${{ env.TF_UPDATE_TYPE }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Terragrunt | ${{ env.TG_VERSION }} | ${{ env.NEW_TG_VERSION }} | ${{ env.TG_UPDATE_TYPE }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Docker Tag | tg-${{ env.TG_VERSION }}-tf-${{ env.TF_VERSION }} | ${{ env.NEW_TAG }} | |" >> $GITHUB_STEP_SUMMARY
 
   ci:
     name: Build Docker Image for CI
@@ -86,7 +125,7 @@ jobs:
     name: Update Git
     runs-on: ubuntu-latest
     needs: [ versions, ci ]
-    if: needs.versions.outputs.new-tag && needs.versions.outputs.tf-version && needs.versions.outputs.tg-version
+    if: needs.versions.outputs.new-tag && needs.versions.outputs.tf-version && needs.versions.outputs.tg-version && needs.versions.outputs.update-type
     environment: main
     outputs:
       new-tag: ${{ steps.variables.outputs.new-tag }}
@@ -134,10 +173,15 @@ jobs:
 
       - name: Commit updated Dockerfile
         run: |
+          if [[ "${{ needs.versions.outputs.tf-version }}" == "major" ]]; then
+            BC="\n\nBREAKING CHANGE: this include a new MAJOR version of the tools"
+          else
+            BC=""
+          fi
           git checkout main
           git add Dockerfile
           if ! git diff-index --quiet HEAD -- Dockerfile; then
-            git commit -m "chore(tool-versions): Update Dockerfile with new Terraform and Terragrunt versions [skip ci]"
+            git commit -m "chore(tool-versions-${{ needs.versions.outputs.update-type }}): Update Dockerfile with new Terraform and Terragrunt versions [skip ci]$BC"
             git push origin main
           fi
 
