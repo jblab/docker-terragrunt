@@ -1,3 +1,5 @@
+## [2.15.6](https://github.com/jblab/docker-terragrunt/compare/2.15.5...2.15.6) (2025-09-23)
+
 ## [2.15.5](https://github.com/jblab/docker-terragrunt/compare/2.15.4...2.15.5) (2025-09-18)
 
 ## [2.15.4](https://github.com/jblab/docker-terragrunt/compare/2.15.3...2.15.4) (2025-09-17)
