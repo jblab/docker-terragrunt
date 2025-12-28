@@ -3,6 +3,9 @@
 # ----------------------------------------------------------------------------------------------------------------------
 FROM ubuntu:noble AS base
 
+ARG TARGETPLATFORM
+ARG BUILDPLATFORM
+
 ARG TERRAFORM_VERSION=1.14.3
 ARG TERRAGRUNT_VERSION=0.96.1
 ARG USER_ID=1000
@@ -33,15 +36,25 @@ RUN set -eu; \
     rm -rf /var/lib/apt/lists/*;
 
 RUN set -eu; \
-    curl -o terraform.zip https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/terraform_${TERRAFORM_VERSION}_linux_amd64.zip; \
+    case "$TARGETPLATFORM" in \
+      linux/amd64) ARCH_SUFFIX="linux_amd64";; \
+      linux/arm64) ARCH_SUFFIX="linux_arm64";; \
+      *) echo "Unsupported TARGETPLATFORM=${TARGETPLATFORM}" >&2; exit 1;; \
+    esac; \
+    curl -o terraform.zip https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/terraform_${TERRAFORM_VERSION}_${ARCH_SUFFIX}.zip; \
     unzip terraform.zip; \
     rm terraform.zip; \
     mv terraform /usr/local/bin/; \
     chmod +x /usr/local/bin/terraform; \
     terraform -version
 
-ADD https://github.com/gruntwork-io/terragrunt/releases/download/v${TERRAGRUNT_VERSION}/terragrunt_linux_amd64 /usr/local/bin/terragrunt
-RUN set -e; \
+RUN set -eu; \
+    case "$TARGETPLATFORM" in \
+      linux/amd64) ARCH_SUFFIX="linux_amd64";; \
+      linux/arm64) ARCH_SUFFIX="linux_arm64";; \
+      *) echo "Unsupported TARGETPLATFORM=${TARGETPLATFORM}" >&2; exit 1;; \
+    esac; \
+    curl -o /usr/local/bin/terragrunt https://github.com/gruntwork-io/terragrunt/releases/download/v${TERRAGRUNT_VERSION}/terragrunt_${ARCH_SUFFIX}; \
     chmod +x /usr/local/bin/terragrunt; \
     terragrunt -version
 
