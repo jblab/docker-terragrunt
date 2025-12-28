@@ -1,3 +1,15 @@
+# [3.0.0](https://github.com/jblab/docker-terragrunt/compare/2.25.1...3.0.0) (2025-12-28)
+
+
+### Features
+
+* upgrade OS from Ubuntu Jammy to Ubuntu Noble, upgrade Node.js version to 24 in the ADO Builder ([b8a8c32](https://github.com/jblab/docker-terragrunt/commit/b8a8c32cc796f31e600b5074f86a8bc8e1e17305))
+
+
+### BREAKING CHANGES
+
+* OS is now Ubuntu Jammy
+
 ## [2.25.1](https://github.com/jblab/docker-terragrunt/compare/2.25.0...2.25.1) (2025-12-18)
 
 # [2.25.0](https://github.com/jblab/docker-terragrunt/compare/2.24.0...2.25.0) (2025-12-16)
