@@ -1,3 +1,10 @@
+# [3.2.0](https://github.com/jblab/docker-terragrunt/compare/3.1.0...3.2.0) (2025-12-28)
+
+
+### Features
+
+* add `just` and `jq` to the dev stage tools ([1b3d1af](https://github.com/jblab/docker-terragrunt/commit/1b3d1af45c586c75fb8fe5715172d34361834966))
+
 # [3.1.0](https://github.com/jblab/docker-terragrunt/compare/3.0.0...3.1.0) (2025-12-28)
 
 
