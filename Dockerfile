@@ -1,7 +1,7 @@
 # ----------------------------------------------------------------------------------------------------------------------
 # BASE
 # ----------------------------------------------------------------------------------------------------------------------
-FROM ubuntu:jammy AS base
+FROM ubuntu:noble AS base
 
 ARG TERRAFORM_VERSION=1.14.3
 ARG TERRAGRUNT_VERSION=0.96.1
@@ -9,14 +9,23 @@ ARG USER_ID=1000
 ARG GROUP_ID=1000
 
 RUN set -eu; \
-    groupadd --gid $GROUP_ID --system terragrunt; \
-    useradd \
-        --uid $USER_ID \
-        --gid $GROUP_ID \
-        --home /home/terragrunt \
-        --system \
-        --shell /sbin/nologin \
-        terragrunt
+    userdel ubuntu || true; \
+    groupdel ubuntu || true; \
+    if [ "$GROUP_ID" -ne 0 ]; then \
+        if ! getent group "$GROUP_ID" > /dev/null 2>&1; then \
+            groupadd --gid "$GROUP_ID" terragrunt; \
+        fi; \
+    fi; \
+    if [ "$USER_ID" -ne 0 ]; then \
+        if ! getent passwd "$USER_ID" > /dev/null 2>&1; then \
+            useradd \
+                --uid "$USER_ID" \
+                --gid "$GROUP_ID" \
+                --home /home/terragrunt \
+                --shell /sbin/nologin \
+                terragrunt; \
+        fi; \
+    fi;
 
 RUN set -eu; \
     apt update; \
@@ -55,20 +64,21 @@ CMD ["sleep", "infinity"]
 
 # ----------------------------------------------------------------------------------------------------------------------
 # ADO Builder target, this image should be pushed to a Docker registry and used by the Azure DevOps Build Agent.
-# Build it with: docker build -t namespace/image_name:version --target terragrunt_ado_builder .
+# Build it with: docker build -t namespace/image_name:version --target ado_builder .
 # ----------------------------------------------------------------------------------------------------------------------
 FROM base AS ado_builder
 
-ARG NODE_MAJOR="20"
+ARG NODE_MAJOR="24"
 
 RUN set -eu; \
     apt-get update; \
-    apt-get install -y ca-certificates gnupg; \
+    apt-get install -y --no-install-recommends ca-certificates gnupg; \
     mkdir -p /etc/apt/keyrings ; \
     curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key | gpg --dearmor -o /etc/apt/keyrings/nodesource.gpg; \
     echo "deb [signed-by=/etc/apt/keyrings/nodesource.gpg] https://deb.nodesource.com/node_$NODE_MAJOR.x nodistro main" | tee /etc/apt/sources.list.d/nodesource.list; \
     apt-get update; \
-    apt-get install nodejs -y; \
-    rm -rf /var/lib/apt/lists/*;
+    apt-get install -y --no-install-recommends nodejs; \
+    rm -rf /var/lib/apt/lists/*; \
+    node --version;
 
 LABEL "com.azure.dev.pipelines.agent.handler.node.path"="/usr/bin/node"
