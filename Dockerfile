@@ -10,11 +10,12 @@ ARG TERRAFORM_VERSION=1.14.3
 ARG TERRAGRUNT_VERSION=0.96.1
 ARG USER_ID=1000
 ARG GROUP_ID=1000
+ARG HOME_DIR=/home/terragrunt
 
 ARG DEBIAN_FRONTEND=noninteractive
 
 RUN set -eu; \
-    userdel ubuntu || true; \
+    userdel -r ubuntu || true; \
     groupdel ubuntu || true; \
     if [ "$GROUP_ID" -ne 0 ]; then \
         if ! getent group "$GROUP_ID" > /dev/null 2>&1; then \
@@ -26,7 +27,8 @@ RUN set -eu; \
             useradd \
                 --uid "$USER_ID" \
                 --gid "$GROUP_ID" \
-                --home /home/terragrunt \
+                --home "$HOME_DIR" \
+                --create-home \
                 --shell /sbin/nologin \
                 terragrunt; \
         fi; \
@@ -70,8 +72,26 @@ FROM base AS dev
 
 RUN set -eu; \
     apt-get update; \
-    apt-get install -y --no-install-recommends vim tree make graphviz; \
+    apt-get install -y --no-install-recommends vim tree make graphviz jq; \
     rm -rf /var/lib/apt/lists/*;
+
+RUN set -eu; \
+    case "$TARGETPLATFORM" in \
+      linux/amd64) ARCH_SUFFIX="x86_64";; \
+      linux/arm64) ARCH_SUFFIX="aarch64";; \
+      *) echo "Unsupported TARGETPLATFORM=${TARGETPLATFORM}" >&2; exit 1;; \
+    esac; \
+    cd tmp; \
+    LATEST_VERSION=$(curl --silent "https://api.github.com/repos/casey/just/releases/latest" | jq -r ".tag_name"); \
+    curl -Lo just.tar.gz https://github.com/casey/just/releases/download/${LATEST_VERSION}/just-${LATEST_VERSION}-${ARCH_SUFFIX}-unknown-linux-musl.tar.gz; \
+    mkdir just; \
+    tar zxvf just.tar.gz -C just; \
+    mv just/just /usr/local/bin; \
+    chmod +x /usr/local/bin/just; \
+    rm -rf just just.tar.gz; \
+    mkdir -p "/opt/just/"; \
+    just --completions bash > "/opt/just/just.sh"; \
+    just --version
 
 USER terragrunt
 
