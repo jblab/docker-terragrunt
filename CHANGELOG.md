@@ -1,3 +1,10 @@
+# [3.1.0](https://github.com/jblab/docker-terragrunt/compare/3.0.0...3.1.0) (2025-12-28)
+
+
+### Features
+
+* add ARM64 support ([0d0f2a0](https://github.com/jblab/docker-terragrunt/commit/0d0f2a0226a81fc04fa0c8fd2fec41367e9ff28f))
+
 # [3.0.0](https://github.com/jblab/docker-terragrunt/compare/2.25.1...3.0.0) (2025-12-28)
 
 
