@@ -128,7 +128,7 @@ jobs:
     if: needs.versions.outputs.new-tag && needs.versions.outputs.tf-version && needs.versions.outputs.tg-version && needs.versions.outputs.update-type
     environment: main
     outputs:
-      new-tag: ${{ steps.variables.outputs.new-tag }}
+      new-tag: ${{ steps.release.outputs.new-tag }}
     steps:
       - uses: actions/create-github-app-token@v1.11.0
         id: app-token
@@ -144,14 +144,6 @@ jobs:
           fetch-depth: 1
           token: ${{ steps.app-token.outputs.token }}
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version-file: '.nvmrc'
-
-      - name: Install dependencies
-        run: npm install
-
       - name: Set up Git
         run: |
           git config --global user.name 'github-actions[bot]'
@@ -161,15 +153,6 @@ jobs:
         run: |
           sed -i "s/^ARG TERRAFORM_VERSION=.*/ARG TERRAFORM_VERSION=${{ needs.versions.outputs.tf-version }}/" Dockerfile
           sed -i "s/^ARG TERRAGRUNT_VERSION=.*/ARG TERRAGRUNT_VERSION=${{ needs.versions.outputs.tg-version }}/" Dockerfile
-
-      - name: Get Latest Tag and Release
-        run: |
-          LATEST_RELEASE=$(gh release list --repo jblab/docker-terragrunt --limit 1 --exclude-drafts --json name -q .[0].name || echo 'N/A')
-          LATEST_TAG=$(gh api -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version: 2022-11-28" /repos/${{ github.repository }}/tags -q .[0].name || echo 'N/A')
-          echo "LATEST_RELEASE=$LATEST_RELEASE" >> $GITHUB_ENV
-          echo "LATEST_TAG=$LATEST_TAG" >> $GITHUB_ENV
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Commit updated Dockerfile
         run: |
@@ -185,30 +168,12 @@ jobs:
             git push origin main
           fi
 
-      - name: Run semantic-release
-        id: semantic
-        run: |
-          npx semantic-release 2>&1 | tee release_output.txt
-          TAG=$(tail -1 release_output.txt | grep -oP "\d+\.\d+\.\d+" || true)
-          if [[ -n "$TAG" ]]; then
-            echo "NEW_TAG=$TAG" >> $GITHUB_ENV
-          fi
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Export outputs
-        id: variables
-        run: |
-          echo "new-tag=${{ env.NEW_TAG }}" >> $GITHUB_OUTPUT
-
-      - name: Publish Summary
-        run: |
-          echo "## New Tag summary" >> $GITHUB_STEP_SUMMARY
-          echo "A new Release and Tag has been created."
-          echo "| | Prvious | New |" >> $GITHUB_STEP_SUMMARY
-          echo "| --- | :-: | :-: |" >> $GITHUB_STEP_SUMMARY
-          echo "| Tag | ${{ env.LATEST_TAG }} | ${{ env.NEW_TAG }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Release | ${{ env.LATEST_RELEASE }} | ${{ env.NEW_TAG }} |" >> $GITHUB_STEP_SUMMARY
+      - uses: jblab/.github/.github/actions/release@main
+        id: release
+        with:
+          app-id: ${{ vars.GHA_BOT_APP_ID }}
+          repository: ${{ github.repository }}
+          app-private-key: ${{ secrets.GHA_BOT_PRIVATE_KEY }}
 
   build:
     name: Build and Push Docker Image
