@@ -3,9 +3,12 @@
 # ----------------------------------------------------------------------------------------------------------------------
 FROM ubuntu:noble AS base
 
+LABEL org.opencontainers.image.ref.name=jbonnier/terragrunt
 LABEL org.opencontainers.image.source=https://github.com/jblab/docker-terragrunt
 LABEL org.opencontainers.image.description="Docker image with Terraform and Terragrunt for consistent, versioned infrastructure deployment."
 LABEL org.opencontainers.image.licenses=Apache-2.0
+LABEL org.opencontainers.image.vendor=jblab
+
 
 ARG TARGETPLATFORM
 ARG BUILDPLATFORM

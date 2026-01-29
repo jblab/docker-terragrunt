@@ -19,6 +19,10 @@ on:
         description: 'The Terragrunt version'
         required: true
         type: string
+      version:
+        description: 'The image version'
+        type: string
+        default: ''
       environment:
         description: 'The environment for the secrets'
         type: string
@@ -64,6 +68,8 @@ jobs:
           labels: |
             io.jblab.build.number=${{ github.run_id }}.${{ github.run_number }}
             io.jblab.git.repository=${{ github.repositoryUrl }}
+            org.opencontainers.image.version=${{ inputs.version }}
+            org.opencontainers.image.revision=${{ github.ref }}
           build-args: |
             TERRAFORM_VERSION=${{ inputs.tf_version }}
             TERRAGRUNT_VERSION=${{ inputs.tg_version }}
