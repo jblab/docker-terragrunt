@@ -1,3 +1,15 @@
+# [3.7.0](https://github.com/jblab/docker-terragrunt/compare/3.6.1...3.7.0) (2026-01-29)
+
+
+### Bug Fixes
+
+* use the correct output for major version comparison and improve automated commit messages ([078c42a](https://github.com/jblab/docker-terragrunt/commit/078c42a9a2173821318ec7d39e9ceab843325540))
+
+
+### Features
+
+* add more OCI labels, simplify workflows using matrix, add new version tags ([ae8f639](https://github.com/jblab/docker-terragrunt/commit/ae8f639ac747e3efe69d17e6472628b916740df9))
+
 ## [3.6.1](https://github.com/jblab/docker-terragrunt/compare/3.6.0...3.6.1) (2026-01-29)
 
 # [3.6.0](https://github.com/jblab/docker-terragrunt/compare/3.5.0...3.6.0) (2026-01-27)
