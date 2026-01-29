@@ -156,8 +156,8 @@ jobs:
 
       - name: Commit updated Dockerfile
         run: |
-          if [[ "${{ needs.versions.outputs.tf-version }}" == "major" ]]; then
-            BC="\n\nBREAKING CHANGE: this include a new MAJOR version of the tools"
+          if [[ "${{ needs.versions.outputs.update-type  }}" == "major" ]]; then
+            BC=$'\n\nBREAKING CHANGE: this include a new MAJOR version of the tools'
           else
             BC=""
           fi
