@@ -180,42 +180,32 @@ jobs:
     name: Build and Push Docker Image
     needs: [ versions, ci, git ]
     if: needs.versions.outputs.new-tag && needs.versions.outputs.tf-version && needs.versions.outputs.tg-version && needs.git.outputs.new-tag
+    strategy:
+      matrix:
+        include:
+          - target: 'base'
+            tags: |
+              ${{ vars.DOCKER_REPOSITORY_NAME }}:${{ needs.git.outputs.new-tag }}-${{ needs.versions.outputs.new-tag }}
+              ${{ vars.DOCKER_REPOSITORY_NAME }}:${{ needs.git.outputs.new-tag }}
+              ${{ vars.DOCKER_REPOSITORY_NAME }}:latest
+            version: ${{ needs.git.outputs.new-tag }}
+          - target: 'dev'
+            tags: |
+              ${{ vars.DOCKER_REPOSITORY_NAME }}:${{ needs.git.outputs.new-tag }}-${{ needs.versions.outputs.new-tag }}-dev-tools
+              ${{ vars.DOCKER_REPOSITORY_NAME }}:${{ needs.git.outputs.new-tag }}-dev-tools
+            version: ${{ needs.git.outputs.new-tag }}-dev-tools
+          - target: 'ado_builder'
+            tags: |
+              ${{ vars.DOCKER_REPOSITORY_NAME }}:${{ needs.git.outputs.new-tag }}-${{ needs.versions.outputs.new-tag }}-azdo
+              ${{ vars.DOCKER_REPOSITORY_NAME }}:${{ needs.git.outputs.new-tag }}-azdo
+            version: ${{ needs.git.outputs.new-tag }}-azdo
     uses: ./.github/workflows/docker-build.yaml
     with:
       push_image: true
       environment: main
+      version: ${{ matrix.version }}
       tf_version: ${{ needs.versions.outputs.tf-version }}
       tg_version: ${{ needs.versions.outputs.tg-version }}
-      tags: |
-        ${{ vars.DOCKER_REPOSITORY_NAME }}:${{ needs.git.outputs.new-tag }}-${{ needs.versions.outputs.new-tag }}
-        ${{ vars.DOCKER_REPOSITORY_NAME }}:latest
-      target: 'base'
-    secrets: inherit
-
-  build_dev:
-    name: Build and Push Docker Image for Azure DevOps
-    needs: [ versions, ci, git ]
-    if: needs.versions.outputs.new-tag && needs.versions.outputs.tf-version && needs.versions.outputs.tg-version && needs.git.outputs.new-tag
-    uses: ./.github/workflows/docker-build.yaml
-    with:
-      push_image: true
-      environment: main
-      tf_version: ${{ needs.versions.outputs.tf-version }}
-      tg_version: ${{ needs.versions.outputs.tg-version }}
-      target: 'dev'
-      tags: ${{ vars.DOCKER_REPOSITORY_NAME }}:${{ needs.git.outputs.new-tag }}-${{ needs.versions.outputs.new-tag }}-dev-tools
-    secrets: inherit
-
-  build_ado:
-    name: Build and Push Docker Image for Azure DevOps
-    needs: [ versions, ci, git ]
-    if: needs.versions.outputs.new-tag && needs.versions.outputs.tf-version && needs.versions.outputs.tg-version && needs.git.outputs.new-tag
-    uses: ./.github/workflows/docker-build.yaml
-    with:
-      push_image: true
-      environment: main
-      tf_version: ${{ needs.versions.outputs.tf-version }}
-      tg_version: ${{ needs.versions.outputs.tg-version }}
-      target: 'ado_builder'
-      tags: ${{ vars.DOCKER_REPOSITORY_NAME }}:${{ needs.git.outputs.new-tag }}-${{ needs.versions.outputs.new-tag }}-azdo
+      target: ${{ matrix.target }}
+      tags: ${{ matrix.tags }}
     secrets: inherit
