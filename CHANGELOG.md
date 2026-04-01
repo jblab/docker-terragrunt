@@ -1,3 +1,15 @@
+# [4.0.0](https://github.com/jblab/docker-terragrunt/compare/3.7.9...4.0.0) (2026-04-01)
+
+
+### chore
+
+* **tool-versions-major:** Update Dockerfile with new Terraform and Terragrunt versions [skip ci] ([5206b6d](https://github.com/jblab/docker-terragrunt/commit/5206b6d028123f79384adcb6bf19ab64428bffd6))
+
+
+### BREAKING CHANGES
+
+* **tool-versions-major:** this include a new MAJOR version of the tools
+
 ## [3.7.9](https://github.com/jblab/docker-terragrunt/compare/3.7.8...3.7.9) (2026-03-27)
 
 ## [3.7.8](https://github.com/jblab/docker-terragrunt/compare/3.7.7...3.7.8) (2026-03-26)
