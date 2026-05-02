@@ -18,7 +18,7 @@ jobs:
       update-type: ${{ steps.variables.outputs.update-type }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-depth: 1
 
@@ -139,7 +139,7 @@ jobs:
             docker-terragrunt
 
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-depth: 1
           token: ${{ steps.app-token.outputs.token }}
