@@ -1,3 +1,10 @@
+# [4.2.0](https://github.com/jblab/docker-terragrunt/compare/4.1.1...4.2.0) (2026-05-02)
+
+
+### Features
+
+* add image digest output to Docker build workflow ([51b4853](https://github.com/jblab/docker-terragrunt/commit/51b4853b94e818f886359472b1b4a15b19ecd598))
+
 ## [4.1.1](https://github.com/jblab/docker-terragrunt/compare/4.1.0...4.1.1) (2026-05-02)
 
 # [4.1.0](https://github.com/jblab/docker-terragrunt/compare/4.0.4...4.1.0) (2026-04-30)
