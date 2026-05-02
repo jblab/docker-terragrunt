@@ -36,11 +36,17 @@ on:
         required: true
       DOCKER_TOKEN:
         required: true
+    outputs:
+      image-digest:
+        description: 'The pushed image digest'
+        value: ${{ jobs.build.outputs.image-digest }}
 
 jobs:
   build:
     runs-on: ubuntu-latest
     environment: ${{ inputs.environment }}
+    outputs:
+      image-digest: ${{ steps.build.outputs.digest }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -58,6 +64,7 @@ jobs:
           password: ${{ secrets.DOCKER_TOKEN }}
 
       - name: Build and Push Docker Image
+        id: build
         uses: docker/build-push-action@v6
         with:
           platforms: linux/amd64,linux/arm64
@@ -73,5 +80,7 @@ jobs:
           build-args: |
             TERRAFORM_VERSION=${{ inputs.tf_version }}
             TERRAGRUNT_VERSION=${{ inputs.tg_version }}
+          sbom: ${{ inputs.push_image }}
+          provenance: ${{ inputs.push_image && 'mode=max' || 'false' }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
