@@ -133,7 +133,7 @@ jobs:
       - uses: actions/create-github-app-token@v3
         id: app-token
         with:
-          app-id: ${{ vars.GHA_BOT_APP_ID }}
+          client-id: ${{ vars.GHA_BOT_CLIENT_ID }}
           private-key: ${{ secrets.GHA_BOT_PRIVATE_KEY }}
           repositories: |
             docker-terragrunt
@@ -171,7 +171,7 @@ jobs:
       - uses: jblab/.github/.github/actions/release@main
         id: release
         with:
-          app-id: ${{ vars.GHA_BOT_APP_ID }}
+          app-client-id: ${{ vars.GHA_BOT_CLIENT_ID }}
           repository: ${{ github.repository }}
           app-private-key: ${{ secrets.GHA_BOT_PRIVATE_KEY }}
           skip-checkout: true
