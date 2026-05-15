@@ -9,7 +9,6 @@ LABEL org.opencontainers.image.description="Docker image with Terraform and Terr
 LABEL org.opencontainers.image.licenses=Apache-2.0
 LABEL org.opencontainers.image.vendor=jblab
 
-
 ARG TARGETPLATFORM
 ARG BUILDPLATFORM
 
@@ -53,8 +52,10 @@ RUN set -eu; \
       *) echo "Unsupported TARGETPLATFORM=${TARGETPLATFORM}" >&2; exit 1;; \
     esac; \
     curl -o terraform.zip https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/terraform_${TERRAFORM_VERSION}_${ARCH_SUFFIX}.zip; \
+    curl -s https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/terraform_${TERRAFORM_VERSION}_SHA256SUMS | grep "terraform_${TERRAFORM_VERSION}_${ARCH_SUFFIX}.zip" | awk '{print $1}' > terraform.sha256; \
+    echo "$(cat terraform.sha256)  terraform.zip" | sha256sum -c -; \
     unzip terraform.zip; \
-    rm terraform.zip; \
+    rm terraform.zip terraform.sha256; \
     mv terraform /usr/local/bin/; \
     chmod +x /usr/local/bin/terraform; \
     terraform -version
@@ -66,6 +67,9 @@ RUN set -eu; \
       *) echo "Unsupported TARGETPLATFORM=${TARGETPLATFORM}" >&2; exit 1;; \
     esac; \
     curl -Lo terragrunt https://github.com/gruntwork-io/terragrunt/releases/download/v${TERRAGRUNT_VERSION}/terragrunt_${ARCH_SUFFIX}; \
+    curl -Ls https://github.com/gruntwork-io/terragrunt/releases/download/v${TERRAGRUNT_VERSION}/SHA256SUMS | grep " terragrunt_${ARCH_SUFFIX}$" | awk '{print $1}' > terragrunt.sha256; \
+    echo "$(cat terragrunt.sha256)  terragrunt" | sha256sum -c -; \
+    rm terragrunt.sha256; \
     mv terragrunt /usr/local/bin/; \
     chmod +x /usr/local/bin/terragrunt; \
     terragrunt -version
@@ -90,12 +94,15 @@ RUN set -eu; \
     esac; \
     cd tmp; \
     LATEST_VERSION=$(curl --silent "https://api.github.com/repos/casey/just/releases/latest" | jq -r ".tag_name"); \
-    curl -Lo just.tar.gz https://github.com/casey/just/releases/download/${LATEST_VERSION}/just-${LATEST_VERSION}-${ARCH_SUFFIX}-unknown-linux-musl.tar.gz; \
+    LATEST_VERSION_FILENAME="just-${LATEST_VERSION}-${ARCH_SUFFIX}-unknown-linux-musl.tar.gz"; \
+    curl -Lo just.tar.gz https://github.com/casey/just/releases/download/${LATEST_VERSION}/${LATEST_VERSION_FILENAME}; \
+    curl -Ls https://github.com/casey/just/releases/download/${LATEST_VERSION}/SHA256SUMS | grep " ${LATEST_VERSION_FILENAME}$" | awk '{print $1}' > just.sha256; \
+    echo "$(cat just.sha256)  just.tar.gz" | sha256sum -c -; \
     mkdir just; \
     tar zxvf just.tar.gz -C just; \
     mv just/just /usr/local/bin; \
     chmod +x /usr/local/bin/just; \
-    rm -rf just just.tar.gz; \
+    rm -rf just just.tar.gz just.sha256; \
     mkdir -p "/opt/just/"; \
     just --completions bash > "/opt/just/just.sh"; \
     just --version
