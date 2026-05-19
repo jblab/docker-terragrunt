@@ -1,3 +1,10 @@
+## [4.2.5](https://github.com/jblab/docker-terragrunt/compare/4.2.4...4.2.5) (2026-05-19)
+
+
+### Bug Fixes
+
+* update OCI label revision to use Git SHA instead of Git ref ([084136d](https://github.com/jblab/docker-terragrunt/commit/084136d2cf77fbde2e026d3fcc104cc3ea2d79ee))
+
 ## [4.2.4](https://github.com/jblab/docker-terragrunt/compare/4.2.3...4.2.4) (2026-05-19)
 
 ## [4.2.3](https://github.com/jblab/docker-terragrunt/compare/4.2.2...4.2.3) (2026-05-14)
