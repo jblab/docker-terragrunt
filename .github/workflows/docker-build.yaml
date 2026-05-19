@@ -76,7 +76,7 @@ jobs:
             io.jblab.build.number=${{ github.run_id }}.${{ github.run_number }}
             io.jblab.git.repository=${{ github.repositoryUrl }}
             org.opencontainers.image.version=${{ inputs.version }}
-            org.opencontainers.image.revision=${{ github.ref }}
+            org.opencontainers.image.revision=${{ github.sha }}
           build-args: |
             TERRAFORM_VERSION=${{ inputs.tf_version }}
             TERRAGRUNT_VERSION=${{ inputs.tg_version }}
