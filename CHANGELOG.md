@@ -1,3 +1,15 @@
+# [5.0.0](https://github.com/jblab/docker-terragrunt/compare/4.5.2...5.0.0) (2026-11-07)
+
+
+### Build System
+
+* upgrade OS from Ubuntu Noble to Ubuntu Resolute, upgrade Node.js version to 26 in the ADO Builder ([32e4032](https://github.com/jblab/docker-terragrunt/commit/32e40320e88cf68998fdbfaf35822c8b90eaa99b))
+
+
+### BREAKING CHANGES
+
+* OS is now Ubuntu Resolute (26.04)
+
 ## [4.5.2](https://github.com/jblab/docker-terragrunt/compare/4.5.1...4.5.2) (2026-10-29)
 
 ## [4.5.1](https://github.com/jblab/docker-terragrunt/compare/4.5.0...4.5.1) (2026-10-24)
