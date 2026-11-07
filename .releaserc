@@ -7,16 +7,16 @@ plugins:
         - type: docs
           scope: README
           release: patch
-        - type: chore
+        - type: build
           scope: tool-versions-major
           release: major
-        - type: chore
+        - type: build
           scope: tool-versions-minor
           release: minor
-        - type: chore
+        - type: build
           scope: tool-versions-patch
           release: patch
-        - type: chore
+        - type: build
           scope: tool-versions
           release: patch
         - type: refactor

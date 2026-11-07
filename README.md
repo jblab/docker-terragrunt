@@ -23,7 +23,7 @@ CI/CD pipelines. The lightweight, Ubuntu-based image ensures that you run your p
 >
 > 1. The base image: Also tagged as `latest`, this image contains only the essential tools required for Terragrunt and
 >    Terraform.
-> 2. The `dev-tools` image: Includes additional tools such as `vim`, `tree`, `make`, and `graphviz`, which are useful
+> 2. The `dev-tools` image: Includes additional tools such as `vim`, `tree`, `just`, and `graphviz`, which are useful
 >    during local development and when building Infrastructure-as-Code (IaC) projects.
 > 3. The `azdo` image: Includes Node.js, a requirement for running Azure DevOps Pipeline container jobs with **Linux**
 >    containers on **Windows** hosts. For more details, refer to [the official Azure documentation](https://learn.microsoft.com/en-us/azure/devops/pipelines/process/container-phases?view=azure-devops&tabs=linux#additional-container-requirements).
