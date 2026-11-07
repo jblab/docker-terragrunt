@@ -1,7 +1,7 @@
 # ----------------------------------------------------------------------------------------------------------------------
 # BASE
 # ----------------------------------------------------------------------------------------------------------------------
-FROM ubuntu:noble AS base
+FROM ubuntu:resolute AS base
 
 LABEL org.opencontainers.image.ref.name=jbonnier/terragrunt
 LABEL org.opencontainers.image.source=https://github.com/jblab/docker-terragrunt
@@ -118,7 +118,7 @@ CMD ["sleep", "infinity"]
 # ----------------------------------------------------------------------------------------------------------------------
 FROM base AS ado_builder
 
-ARG NODE_MAJOR="24"
+ARG NODE_MAJOR="26"
 
 RUN set -eu; \
     apt-get update; \
